@@ -8,14 +8,18 @@
     "typescript": "^5.7.2"
   },
   "scripts": {
-    "prebuild": " tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "yarn tsc",
-    "watch": "yarn tsc -w",
+"prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
+    "build": "tsc",
+    "watch": "tsc -w",
     "prestart": "yarn build",
-    "start": "concurrently --kill-others \"yarn watch\" \"yarn nodemon .\" "
+    "start": "nodemon .",
+    "dev": "concurrently --kill-others \"yarn watch\" \"yarn start\""
   },
   "dependencies": {
+    "@types/express": "^5.0.0",
     "concurrently": "^9.1.0",
-    "nodemon": "^3.1.7"
+    "express": "^4.21.1",
+    "nodemon": "^3.1.7",
+    "socket.io": "^4.8.1"
   }
 }
