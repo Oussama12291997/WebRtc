@@ -18,13 +18,18 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id)
-
+  console.log("-----------------------------------")
     roomHandler(socket)
+    
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id)
+    console.log("-----------------------------------")
+
   })
 })
 
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`)
+  console.log("-----------------------------------")
+
 })

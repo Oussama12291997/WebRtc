@@ -12,14 +12,28 @@ export const roomHandler=(socket:Socket)=>{
     const roomId=uuidV4()
     rooms[roomId]=[]
     socket.emit("room-created",{roomId})
+    console.log("-----------------------------------")
+
     console.log("user created The  room")
+    console.log("-----------------------------------")
+
   }
 
   const joinRoom=({roomId,peerId}:IRoomParams)=>{
-    console.log("new user joined the room:",roomId, peerId) 
+    console.log("-----------------------------------")
+    if(rooms[roomId]){
+    console.log(`user joined the room:"${roomId} and ${peerId}`)
+    console.log("-----------------------------------")
+    console.log(rooms)
+    rooms[roomId].push(peerId)
     socket.join(roomId)
+    socket.emit("get-users",{
+      roomId,
+      participants:rooms[roomId]
+    })
+    
+  }else console.log("no room found")
   }
-
   socket.on("create-room",createRoom)
   socket.on("join-room",joinRoom)
 

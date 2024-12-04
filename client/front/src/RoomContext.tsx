@@ -14,15 +14,21 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   let navigate=useNavigate()
   const [me,setMe]=useState<Peer>()
   const enterRoom=({roomId}:{roomId:string})=>{
-      console.log({roomId})
+      //console.log({roomId})
       navigate(`/Room/${roomId}`)
+  }
+  const getUsers=({participants}: {participants:string[]})=>{
+    console.log({participants},"ree")
   }
   useEffect(()=>{
     const meId=uuidv4()
     const peer =new Peer(meId)
+    console.log("-----------------------------------")
+
     setMe(peer)
     ws.on("room-created",enterRoom)
-  })
+    ws.on("get-users",getUsers)
+  },[])
   return (
     <RoomContext.Provider value={{ ws ,me}}>
       {children}
