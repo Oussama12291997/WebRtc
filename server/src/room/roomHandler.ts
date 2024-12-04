@@ -31,8 +31,30 @@ export const roomHandler=(socket:Socket)=>{
       roomId,
       participants:rooms[roomId]
     })
-    
+
   }else console.log("no room found")
+
+
+
+  socket.on("disconnect", () => {
+    console.log("user left the room" , peerId)
+    console.log("-----------------------------------")
+  leaveRoom({roomId,peerId})
+  })
+
+
+
+
+
+
+
+
+
+
+  }
+  const leaveRoom=({roomId,peerId}:IRoomParams)=>{
+    rooms[roomId]=rooms[roomId].filter((id)=>id!==peerId)
+    socket.to(roomId).emit("user-disconnected",peerId)
   }
   socket.on("create-room",createRoom)
   socket.on("join-room",joinRoom)
