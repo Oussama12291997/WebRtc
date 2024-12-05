@@ -13,12 +13,13 @@ interface RoomProviderProps {
 export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   let navigate=useNavigate()
   const [me,setMe]=useState<Peer>()
+  const [stream,setStream]=useState<MediaStream>()
   const enterRoom=({roomId}:{roomId:string})=>{
       //console.log({roomId})
       navigate(`/Room/${roomId}`)
   }
   const getUsers=({participants}: {participants:string[]})=>{
-    console.log({participants},"ree")
+    console.log({participants})
   }
   useEffect(()=>{
     const meId=uuidv4()
@@ -26,11 +27,21 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     console.log("-----------------------------------")
 
     setMe(peer)
+
+    try{
+              navigator.mediaDevices.getUserMedia({video:true,audio:true})
+              .then((stream)=>{
+                setStream(stream)
+              })
+    }catch(error){
+      console.log(error)
+    }
+
     ws.on("room-created",enterRoom)
     ws.on("get-users",getUsers)
   },[])
   return (
-    <RoomContext.Provider value={{ ws ,me}}>
+    <RoomContext.Provider value={{ ws ,me,stream}}>
       {children}
     </RoomContext.Provider>
   )
