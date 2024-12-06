@@ -1,8 +1,10 @@
 import Peer from "peerjs"
-import React, { createContext, ReactNode, useEffect, useState } from "react"
+import React, { createContext, ReactNode, useEffect, useReducer, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import {io} from "socket.io-client"
 import { v4 as uuidv4 } from "uuid"
+import { peersReducer } from "./peerReducer"
+
 const WS = "http://127.0.0.1:8080/"
 const RoomContext = createContext<any | null>(null)
 const ws = io(WS)
@@ -14,6 +16,9 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   let navigate=useNavigate()
   const [me,setMe]=useState<Peer>()
   const [stream,setStream]=useState<MediaStream>()
+
+  const [peers,dispatch]=useReducer(peersReducer,{})
+
   const enterRoom=({roomId}:{roomId:string})=>{
       //console.log({roomId})
       navigate(`/Room/${roomId}`)
