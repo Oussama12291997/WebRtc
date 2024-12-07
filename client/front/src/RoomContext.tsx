@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import {io} from "socket.io-client"
 import { v4 as uuidv4 } from "uuid"
 import { peersReducer } from "./peerReducer"
+import { addPeerAction } from "./PeerActions"
 
 const WS = "http://127.0.0.1:8080/"
 const RoomContext = createContext<any | null>(null)
@@ -45,6 +46,28 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     ws.on("room-created",enterRoom)
     ws.on("get-users",getUsers)
   },[])
+
+
+  useEffect(()=>{
+    if(!me) return
+    if(!stream) return
+    ws.on("user-joind",({peerId})=>{
+      const call=me.call(peerId,stream);
+      call.on("stream",(peerStream)=>{
+          dispatch(addPeerAction(peerId,peerStream))
+      })
+    })
+
+
+    me.on("call",(call)=>{
+      call.answer(stream)
+      call.on("stream",(peerStream)=>{
+        dispatch(addPeerAction(call.peer,peerStream))
+      })
+    })
+
+
+  },[me,stream])
   return (
     <RoomContext.Provider value={{ ws ,me,stream}}>
       {children}
