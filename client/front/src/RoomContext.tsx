@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import {io} from "socket.io-client"
 import { v4 as uuidv4 } from "uuid"
 import { peersReducer } from "./peerReducer"
-import { addPeerAction } from "./PeerActions"
+import { addPeerAction, removePeerAction } from "./PeerActions"
 
 const WS = "http://127.0.0.1:8080/"
 const RoomContext = createContext<any | null>(null)
@@ -24,8 +24,13 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
       //console.log({roomId})
       navigate(`/Room/${roomId}`)
   }
+
+
+  const removePeer=(peerId:string)=>{
+        dispatch(removePeerAction(peerId))
+  }
   const getUsers=({participants}: {participants:string[]})=>{
-    console.log({participants})
+    return {participants}
   }
   useEffect(()=>{
     const meId=uuidv4()
@@ -40,26 +45,33 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
                 setStream(stream)
               })
     }catch(error){
-      console.log(error)
+      console.error(error)
     }
 
     ws.on("room-created",enterRoom)
     ws.on("get-users",getUsers)
+    ws.on("user-disconnected",removePeer)
+
   },[])
 
 
   useEffect(()=>{
     if(!me) return
     if(!stream) return
-    ws.on("user-joind",({peerId})=>{
+    ws.on("user-joined",({peerId})=>{
+      console.log("user-joined")
       const call=me.call(peerId,stream);
+      console.log(call)
       call.on("stream",(peerStream)=>{
           dispatch(addPeerAction(peerId,peerStream))
+          console.log(peers,"peer from user-joind")
       })
     })
 
 
     me.on("call",(call)=>{
+      console.log("me call")
+
       call.answer(stream)
       call.on("stream",(peerStream)=>{
         dispatch(addPeerAction(call.peer,peerStream))
@@ -68,8 +80,9 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
 
 
   },[me,stream])
+  console.log(peers, 'peers bro')
   return (
-    <RoomContext.Provider value={{ ws ,me,stream}}>
+    <RoomContext.Provider value={{ ws ,me,stream,peers}}>
       {children}
     </RoomContext.Provider>
   )

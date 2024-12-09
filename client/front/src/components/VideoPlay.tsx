@@ -7,9 +7,9 @@ const VideoPlay:React.FC<{stream:MediaStream}>= ({stream}) => {
         if(videoRef.current) videoRef.current.srcObject=stream
     },[stream])
   return (
-    <div>
-        <video ref={videoRef} autoPlay/>
-    </div>
+    <div >
+        <video  ref={videoRef} autoPlay/>
+    </div> 
   )
 }
 
