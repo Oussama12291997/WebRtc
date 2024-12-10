@@ -12,7 +12,7 @@ export const JoinButton: React.FC = () => {
   
 
   return (
-    <div className="flex justify-between justify-items-center w-[800px]">
+    <div className="">
 
 <button 
       onClick={createRoom} 

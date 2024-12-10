@@ -19,12 +19,16 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   const [stream,setStream]=useState<MediaStream>()
 
   const [peers,dispatch]=useReducer(peersReducer,{})
-
+  const [screenSharingId,setSharingId]=useState<string>()
   const enterRoom=({roomId}:{roomId:string})=>{
       //console.log({roomId})
       navigate(`/Room/${roomId}`)
   }
 
+  const switchStream=(stream:MediaStream)=>{
+    setStream(stream)
+    setSharingId(me?.id || "")
+  }
 
   const removePeer=(peerId:string)=>{
         dispatch(removePeerAction(peerId))
@@ -32,10 +36,19 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
   const getUsers=({participants}: {participants:string[]})=>{
     return {participants}
   }
+  const ShareSceen=()=>{
+    if(screenSharingId){
+            navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(switchStream)
+
+    } 
+    else {navigator.mediaDevices.getDisplayMedia({}).then(switchStream)}
+
+   // Object.keys(me?._connections)
+  }
   useEffect(()=>{
     const meId=uuidv4()
     const peer =new Peer(meId)
-    console.log("-----------------------------------")
+    console.log("------------------------------------")
 
     setMe(peer)
 
@@ -59,9 +72,7 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
     if(!me) return
     if(!stream) return
     ws.on("user-joined",({peerId})=>{
-      console.log("user-joined")
       const call=me.call(peerId,stream);
-      console.log(call)
       call.on("stream",(peerStream)=>{
           dispatch(addPeerAction(peerId,peerStream))
           console.log(peers,"peer from user-joind")
@@ -70,7 +81,6 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
 
 
     me.on("call",(call)=>{
-      console.log("me call")
 
       call.answer(stream)
       call.on("stream",(peerStream)=>{
@@ -78,11 +88,12 @@ export const RoomProvider: React.FC<RoomProviderProps> = ({ children }) => {
       })
     })
 
+console.log(me.connections)
 
-  },[me,stream])
-  console.log(peers, 'peers bro')
+},[me,stream])
+  console.log(peers, "outside useEffect")
   return (
-    <RoomContext.Provider value={{ ws ,me,stream,peers}}>
+    <RoomContext.Provider value={{ ws ,me,stream,peers,ShareSceen}}>
       {children}
     </RoomContext.Provider>
   )
